@@ -80,7 +80,7 @@
 Write-Host ''
 Write-Host 'Restarting vGPU drivers in 3 seconds. Please be patient, your screen may temporarily flash.'
 sleep 3
-Get-PnpDevice -Class Display -FriendlyName NVIDIA* | Foreach-Object -Process { Disable-PnpDevice -confirm:$false -InstanceId $_.InstanceId; Start-Sleep -Seconds 5; Enable-PnpDevice -confirm:$false -InstanceId $_.InstanceId}
+Get-PnpDevice -Class Display -FriendlyName NVIDIA* -Status Error,OK | Foreach-Object -Process { Disable-PnpDevice -confirm:$false -InstanceId $_.InstanceId; Start-Sleep -Seconds 5; Enable-PnpDevice -confirm:$false -InstanceId $_.InstanceId}
 
 Write-Host ''
 Write-Host '(C) 2021 Krutav Shah. Original Powershell task script by Andrew H. at https://gist.github.com/neg2led'
