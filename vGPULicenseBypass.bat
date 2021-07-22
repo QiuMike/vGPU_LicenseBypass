@@ -12,7 +12,7 @@
 
 # *** POWERSHELL CODE STARTS HERE *** #
 
-    Write-Host 'Nvidia vGPU License bypass by Krutav Shah with help from the wonderful vGPU_Unlock community.'
+    Write-Host 'Nvidia vGPU License bypass with help from the wonderful vGPU_Unlock community.'
     Write-Host '----------------------------------------------'
     Write-Host 'Nvidia vGPU is property of NVIDIA Corporation.'
     Write-Host ''
@@ -83,7 +83,7 @@ sleep 3
 Get-PnpDevice -Class Display -FriendlyName NVIDIA* -Status Error,OK | Foreach-Object -Process { Disable-PnpDevice -confirm:$false -InstanceId $_.InstanceId; Start-Sleep -Seconds 5; Enable-PnpDevice -confirm:$false -InstanceId $_.InstanceId}
 
 Write-Host ''
-Write-Host '(C) 2021 Krutav Shah. Original Powershell task script by Andrew H. at https://gist.github.com/neg2led'
+Write-Host '(C) 2021'
 Write-Host ''
 sleep 1
 Write-Host 'Completed, enjoy your free vGPU before Nvidia patches it!' -Fore red
