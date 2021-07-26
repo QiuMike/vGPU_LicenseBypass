@@ -46,7 +46,7 @@
     $time = '3AM'
     $taskName = 'Restart vGPU Driver'
     $taskDescr = "'Restart Nvidia vGPU device drivers daily at $time'"
-    $taskScript = ('"& { Get-PnpDevice -Class Display -FriendlyName NVIDIA* -Status Error,OK | Foreach-Object -Process { Disable-PnpDevice -InstanceId $_.InstanceId; Start-Sleep -Seconds 5; Enable-PnpDevice -InstanceId $_.InstanceId } }"')
+    $taskScript = ('"& { Get-PnpDevice -Class Display -FriendlyName NVIDIA* -Status Error,OK | Foreach-Object -Process { Disable-PnpDevice -confirm:$false -InstanceId $_.InstanceId; Start-Sleep -Seconds 5; Enable-PnpDevice -confirm:$false -InstanceId $_.InstanceId } }"')
 
     try {
         Write-Host 'We will start by changing the unlicensed time from 20 mins to 1440 mins (1 day) with some registry keys'
