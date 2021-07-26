@@ -42,6 +42,21 @@
         }
     )
 
+    # Get the default Admin account
+    function Get-SWLocalAdmin {
+        $computer = "Get-WMIObject  Win32_ComputerSystem"
+        $ComputerName = $computer.name
+        Try {
+                Add-Type -AssemblyName System.DirectoryServices.AccountManagement
+                $PrincipalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext([System.DirectoryServices.AccountManagement.ContextType]::Machine, $ComputerName)
+                $UserPrincipal = New-Object System.DirectoryServices.AccountManagement.UserPrincipal($PrincipalContext)
+                $Searcher = New-Object System.DirectoryServices.AccountManagement.PrincipalSearcher
+                $Searcher.QueryFilter = $UserPrincipal
+                $Searcher.FindAll() | Where-Object {$_.Sid -Like '*-500'}
+        } Catch {
+                Write-Warning -Message "$($_.Exception.Message)"
+        }
+    }
     
     $time = '3AM'
     $taskName = 'Restart vGPU Driver'
@@ -66,10 +81,8 @@
         }
 
         # Create the driver restart task.
-        Write-Output -InputObject ('Adding new scheduled task "{0}", every day at "{1}"...' -f $taskName,$time)
-        # need the change the account name if it is not admin
-	# ToDo, auto get the UserName of the adminstrator
-	$UserName = 'admin'
+        $UserName = "Get-SWLocalAdmin"
+        Write-Output -InputObject ('Adding new scheduled task "{0}", with user account "{1}", every day at "{2}"...' -f $taskName,$UserName,$time)
 	$Principal = New-ScheduledTaskPrincipal -UserID $UserName -RunLevel Highest
         $taskTrigger = New-ScheduledTaskTrigger -Daily -At $time
         $taskAction = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument ('-WindowStyle Hidden -NonInteractive -NoProfile -Command {0} ' -f $taskScript)
