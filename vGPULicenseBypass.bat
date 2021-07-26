@@ -67,9 +67,13 @@
 
         # Create the driver restart task.
         Write-Output -InputObject ('Adding new scheduled task "{0}", every day at "{1}"...' -f $taskName,$time)
+        # need the change the account name if it is not admin
+	# ToDo, auto get the UserName of the adminstrator
+	$UserName = 'admin'
+	$Principal = New-ScheduledTaskPrincipal -UserID $UserName -RunLevel Highest
         $taskTrigger = New-ScheduledTaskTrigger -Daily -At $time
         $taskAction = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument ('-WindowStyle Hidden -NonInteractive -NoProfile -Command {0} ' -f $taskScript)
-        $task = Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Description $taskDescr
+        $task = Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Description $taskDescr -Principal $Principal
         Write-Output -InputObject ('Registered scheduled task "{0}"' -f $task.TaskName)
     } catch {
         throw $PSItem
