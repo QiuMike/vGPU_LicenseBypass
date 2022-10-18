@@ -75,7 +75,7 @@
     $time = '3AM'
     $taskName = 'Restart vGPU Driver'
     $taskDescr = "'Restart Nvidia vGPU device drivers daily at $time'"
-    $taskScript = ('"& { Get-PnpDevice -Class Display -FriendlyName NVIDIA* -Status Error,OK | Foreach-Object -Process { Disable-PnpDevice -confirm:$false -InstanceId $_.InstanceId; Start-Sleep -Seconds 5; Enable-PnpDevice -confirm:$false -InstanceId $_.InstanceId } }"')
+    $taskScript = ('"& { Get-PnpDevice -Class Display -FriendlyName NVIDIA* -Status Error,OK | Foreach-Object -Process { Disable-PnpDevice -confirm:$false -InstanceId $_.InstanceId; Start-Sleep -Seconds 1; Enable-PnpDevice -confirm:$false -InstanceId $_.InstanceId } }"')
 
     try {
         Write-Host 'We will start by changing the unlicensed time from 20 mins to 1440 mins (1 day) with some registry keys'
@@ -103,7 +103,7 @@
             $UserName = "Get-SWLocalAdmin"
         }
         Write-Output -InputObject ('Adding new scheduled task "{0}", with user account "{1}", every day at "{2}"...' -f $taskName,$UserName,$time)
-	$Principal = New-ScheduledTaskPrincipal -UserID $UserName -RunLevel Highest -LogonType S4U
+        $Principal = New-ScheduledTaskPrincipal -UserID $UserName -RunLevel Highest -LogonType S4U
         $taskTrigger = New-ScheduledTaskTrigger -Daily -At $time
         $taskAction = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument ('-WindowStyle Hidden -NonInteractive -NoProfile -Command {0} ' -f $taskScript)
         $task = Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Description $taskDescr
@@ -119,7 +119,7 @@
 Write-Host ''
 Write-Host 'Restarting vGPU drivers in 3 seconds. Please be patient, your screen may temporarily flash.'
 sleep 3
-Get-PnpDevice -Class Display -FriendlyName NVIDIA* -Status Error,OK | Foreach-Object -Process { Disable-PnpDevice -confirm:$false -InstanceId $_.InstanceId; Start-Sleep -Seconds 5; Enable-PnpDevice -confirm:$false -InstanceId $_.InstanceId}
+Get-PnpDevice -Class Display -FriendlyName NVIDIA* -Status Error,OK | Foreach-Object -Process { Disable-PnpDevice -confirm:$false -InstanceId $_.InstanceId; Start-Sleep -Seconds 1; Enable-PnpDevice -confirm:$false -InstanceId $_.InstanceId}
 
 Write-Host ''
 Write-Host '(C) 2021'
