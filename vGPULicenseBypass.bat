@@ -42,6 +42,20 @@
         }
     )
 
+    # Get login account and check if it is the administrator or not
+	function check_login{
+	    $output = whoami /all
+        $IsAdministrator = $false
+
+        foreach($line in $output){
+            if ($line -like '*BUILTIN\Administrators*'){
+                $IsAdministrator = $true
+                break;
+            }
+        }
+
+        return $IsAdministrator
+    }
     # Get the default Admin account
     function Get-SWLocalAdmin {
         $computer = "Get-WMIObject  Win32_ComputerSystem"
@@ -81,12 +95,20 @@
         }
 
         # Create the driver restart task.
-        $UserName = "Get-SWLocalAdmin"
+        if ("check_login" == $true){
+            # we assume that $env:username is the same as whoami
+            $UserName = $env:username
+        } else {
+            # this will lead some issue that the login account is not the internal Administrator
+            $UserName = "Get-SWLocalAdmin"
+        }
         Write-Output -InputObject ('Adding new scheduled task "{0}", with user account "{1}", every day at "{2}"...' -f $taskName,$UserName,$time)
 	$Principal = New-ScheduledTaskPrincipal -UserID $UserName -RunLevel Highest -LogonType S4U
         $taskTrigger = New-ScheduledTaskTrigger -Daily -At $time
         $taskAction = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument ('-WindowStyle Hidden -NonInteractive -NoProfile -Command {0} ' -f $taskScript)
-        $task = Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Description $taskDescr -Principal $Principal
+        $task = Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Description $taskDescr
+		# we seperate the Principal ops for there may be some permission issues, so we could work if user in login status
+        Set-ScheduledTask -TaskName $taskName -Principal $Principal
         Write-Output -InputObject ('Registered scheduled task "{0}"' -f $task.TaskName)
     } catch {
         throw $PSItem
